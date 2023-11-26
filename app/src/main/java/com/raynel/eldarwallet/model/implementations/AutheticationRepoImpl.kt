@@ -1,13 +1,14 @@
-package com.raynel.eldarwallet.model
+package com.raynel.eldarwallet.model.implementations
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import com.raynel.eldarwallet.model.db.User
 import com.raynel.eldarwallet.model.db.UserDao
+import com.raynel.eldarwallet.model.interfaces.Authentication
 import java.lang.Exception
 
-class AutheticationRepoImpl(private val userRepo: UserDao, private val context: Context) : Authentication{
+class AutheticationRepoImpl(private val userRepo: UserDao, private val context: Context) :
+    Authentication {
 
     companion object{
         private const val AUTH_PREFERENCE = "auth"

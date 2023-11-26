@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 
-@Database(entities = [Card::class, User::class], version = 7)
+@Database(entities = [Card::class, User::class], version = 8)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun cardDao(): CardsDao

@@ -1,7 +1,8 @@
-package com.raynel.eldarwallet.model
+package com.raynel.eldarwallet.model.implementations
 
 import com.raynel.eldarwallet.model.db.User
 import com.raynel.eldarwallet.model.db.UserDao
+import com.raynel.eldarwallet.model.interfaces.UserRepo
 import kotlinx.coroutines.flow.Flow
 
 class UserRepoImp(private val userDao: UserDao): UserRepo {
@@ -9,5 +10,5 @@ class UserRepoImp(private val userDao: UserDao): UserRepo {
         return userDao.findUserByEmail(email)
     }
 
-    override fun saldo(email: String): Flow<String?> = userDao.getSaldo(email)
+    override fun amount(email: String): Flow<String?> = userDao.getSaldo(email)
 }

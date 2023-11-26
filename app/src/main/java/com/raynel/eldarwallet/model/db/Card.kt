@@ -13,5 +13,6 @@ data class Card(
     val name: String,
     val cardNumber: String,
     val lastThreeNumbers: String,
-    val dateExpired: String
+    val dateExpired: String,
+    val company: String
 )

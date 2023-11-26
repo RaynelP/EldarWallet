@@ -1,8 +1,12 @@
 package com.raynel.eldarwallet.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.raynel.eldarwallet.model.Authentication
+import com.raynel.eldarwallet.model.interfaces.Authentication
+import com.raynel.eldarwallet.model.implementations.AutheticationRepoImpl
+import com.raynel.eldarwallet.model.db.AppDataBase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,4 +60,19 @@ class AuthViewModel(private val authenticationRepo: Authentication): ViewModel()
         val isRegisterScreenOpen: Boolean = false,
         val emailLogIn: String? = null
     )
+
+    class AuthViewModelFactory(
+        val context: Context
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+            val db = AppDataBase.getInstance(context = context)
+            val authenticationRepo = AutheticationRepoImpl(db.userDao(), context)
+
+            if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
+                return AuthViewModel(authenticationRepo) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
 }

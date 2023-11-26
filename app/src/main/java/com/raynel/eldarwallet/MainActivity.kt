@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.raynel.eldarwallet.model.AutheticationRepoImpl
+import com.raynel.eldarwallet.model.implementations.AutheticationRepoImpl
 import com.raynel.eldarwallet.ui.theme.EldarWalletTheme
 import com.raynel.eldarwallet.view.MyApp
 import com.raynel.eldarwallet.viewmodel.MainViewModel

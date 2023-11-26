@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.raynel.eldarwallet.viewmodel.AuthViewModel
-import com.raynel.eldarwallet.viewmodel.AuthViewModelFactory
 
 @Composable
 fun AuthScreen(
@@ -38,7 +37,7 @@ fun AuthScreen(
 
     // obtengo el viewmodel de la primera pantalla
     val viewModel: AuthViewModel = viewModel(
-        factory = AuthViewModelFactory(context = navController.context)
+        factory = AuthViewModel.AuthViewModelFactory(context = navController.context)
     )
 
     val uiState by viewModel.uiState.collectAsState()
