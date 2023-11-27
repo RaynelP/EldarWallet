@@ -1,4 +1,4 @@
-package com.raynel.eldarwallet.model.db
+package com.raynel.eldarwallet.model.db.entities
 
 import android.provider.ContactsContract.CommonDataKinds.Email
 import androidx.room.Entity

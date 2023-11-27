@@ -1,10 +1,11 @@
-package com.raynel.eldarwallet.model.db
+package com.raynel.eldarwallet.model.db.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.raynel.eldarwallet.model.db.entities.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao

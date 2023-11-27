@@ -26,8 +26,12 @@ class QRViewModel(
     }
     private fun getQR(name: String, lastName: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val img = qrRepo.getQR(name, lastName)
-            _image.value = convertImageByteArrayToBitmap(img)
+            try {
+                val img = qrRepo.getQR(name, lastName)
+                _image.value = convertImageByteArrayToBitmap(img)
+            }catch (e: Exception){
+
+            }
         }
     }
 

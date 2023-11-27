@@ -15,7 +15,7 @@ fun MyApp(email: String?) {
 
     NavHost(navController, startDestination = AppScreen.RedirectScreen.route) {
 
-        // oantalla de redireccion
+        // pantalla de redireccion si hay alguien con la sesion iniciada
         composable(AppScreen.RedirectScreen.route) {
             LaunchedEffect(Unit){
                 if(email == null){

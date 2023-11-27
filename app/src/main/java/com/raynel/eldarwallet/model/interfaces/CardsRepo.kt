@@ -1,7 +1,6 @@
 package com.raynel.eldarwallet.model.interfaces
 
-import com.raynel.eldarwallet.model.db.Card
-import com.raynel.eldarwallet.model.db.User
+import com.raynel.eldarwallet.model.db.entities.Card
 import kotlinx.coroutines.flow.Flow
 
 interface CardsRepo {

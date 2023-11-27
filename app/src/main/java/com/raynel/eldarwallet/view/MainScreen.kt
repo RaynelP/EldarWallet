@@ -1,22 +1,16 @@
 package com.raynel.eldarwallet.view
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,20 +21,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.raynel.eldarwallet.model.db.Card
+import com.raynel.eldarwallet.model.db.entities.Card
 import com.raynel.eldarwallet.viewmodel.MainViewModel
 import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    email: String?,
+    email: String,
 ){
     // obtengo el viewmodel de la primera pantalla
     val viewModel: MainViewModel = viewModel(
         factory = MainViewModel.MainViewModelFactory(
             context = navController.context,
-            email!!
+            email
         )
     )
 
@@ -66,11 +60,11 @@ fun HomeScreen(
                 dateExpired
             )
         },
-        openAddCardScreen = { viewModel.onOpenAddCardScreen() },
+        onOpenAddCardScreen = { viewModel.onOpenAddCardScreen() },
         onCloseSession = { viewModel.onLogOut() },
-        closeAddCardScreen = { viewModel.onCloseAddCardScreen()},
-        onVerifyFields = { name, cardNumber, lastThreeNumbers, dateExpired ->
-            viewModel.verifyFields(
+        onCloseAddCardScreen = { viewModel.onCloseAddCardScreen()},
+        onValidateFields = { name, cardNumber, lastThreeNumbers, dateExpired ->
+            viewModel.validateFields(
                 name,
                 cardNumber,
                 lastThreeNumbers,
@@ -79,11 +73,10 @@ fun HomeScreen(
         },
         onPaymentScreen = {
             navController.navigate(AppScreen.PaymentScreen.route)
-        },
-        onQrScreen = {
-            navController.navigate(AppScreen.QrScreen.route + "/${uiState.user?.name}" + "/${uiState.user?.name}")
         }
-    )
+    ) {
+        navController.navigate(AppScreen.QrScreen.route + "/${uiState.user?.name}" + "/${uiState.user?.lastName}")
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,10 +87,10 @@ fun HomeScreen(
     amount: String,
     cards: List<Card>,
     addCard: (name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String) -> Unit,
-    openAddCardScreen: () -> Unit,
-    closeAddCardScreen: () -> Unit,
+    onOpenAddCardScreen: () -> Unit,
+    onCloseAddCardScreen: () -> Unit,
     onCloseSession: () -> Unit,
-    onVerifyFields: (name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String) -> Boolean,
+    onValidateFields: (name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String) -> Boolean,
     onPaymentScreen: () -> Unit,
     onQrScreen: () -> Unit
 ) {
@@ -107,7 +100,7 @@ fun HomeScreen(
             TopBar(
                 name = uiState.user?.name ?: "",
                 onCloseSession = onCloseSession,
-                onBack = closeAddCardScreen,
+                onBack = onCloseAddCardScreen,
                 uiState = uiState
             )
         },
@@ -115,7 +108,7 @@ fun HomeScreen(
         floatingActionButton = {
             if(!uiState.addCardScreenOpen){
                 FloatingActionButton(
-                    onClick = { openAddCardScreen() },
+                    onClick = { onOpenAddCardScreen() },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                     modifier = Modifier.padding(16.dp)
@@ -128,7 +121,7 @@ fun HomeScreen(
 
         content = {
             if (uiState.addCardScreenOpen) {
-                AddCardScreen(addCard = addCard, modifier = Modifier.padding(it), verifyFields = onVerifyFields)
+                AddCardScreen(addCard = addCard, modifier = Modifier.padding(it), validateFields = onValidateFields)
             } else {
                 MainInfo(
                     modifier = Modifier.padding(it),
@@ -174,14 +167,10 @@ fun MainInfo(
                 style = MaterialTheme.typography.headlineMedium,
             )
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(cards) { card ->
-                    IndividualCard(card = card, onPaymentScreen = {onPaymentScreen()})
-                }
-            }
+            CardList(
+                onPaymentScreen = onPaymentScreen,
+                cards = cards
+            )
         }
 
         Button(onClick = { onQrScreen() }) {
@@ -191,38 +180,20 @@ fun MainInfo(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(
+fun CardList(
     modifier: Modifier = Modifier,
-    name: String,
-    onCloseSession: () -> Unit,
-    uiState: MainViewModel.MainUiState,
-    onBack: () -> Unit,
+    onPaymentScreen: () -> Unit,
+    cards: List<Card>
 ){
-    TopAppBar(
-        title = { Text("Hola, $name") },
-        modifier = Modifier.background(MaterialTheme.colorScheme.primary,),
-        actions = {
-            Row(
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
-                // Otros elementos de la barra superior
-
-                // Botón en la parte derecha
-                IconButton(onClick = { onCloseSession() }) {
-                    Text(text = "Salir")
-                }
-            }
-        },
-        navigationIcon = {
-            if(uiState.addCardScreenOpen){
-                IconButton(onClick = { onBack() }) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "Botón de retroceso")
-                }
-            }
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        items(cards) { card ->
+            IndividualCard(card = card, onPaymentScreen = {onPaymentScreen()})
         }
-    )
+    }
 }
 
 val list =  listOf(
@@ -286,6 +257,7 @@ fun IndividualCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -293,7 +265,6 @@ fun IndividualCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Black
                 )
-
                 Text(
                     "${card.company}",
                     style = MaterialTheme.typography.headlineSmall,
@@ -304,10 +275,24 @@ fun IndividualCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun Preview() {
-
+    HomeScreen(
+        uiState = MainViewModel.MainUiState(),
+        amount = "3565.00",
+        cards = list,
+        addCard = { name, cardNumber, lastThreeNumbers, dateExpired ->
+        },
+        onOpenAddCardScreen = { /*TODO*/ },
+        onCloseAddCardScreen = { /*TODO*/ },
+        onCloseSession = { /*TODO*/ },
+        onValidateFields = { name, cardNumber, lastThreeNumbers, dateExpired ->
+            true
+        },
+        onPaymentScreen = { /*TODO*/ }) {
+        
+    }
 }
 
 @Preview

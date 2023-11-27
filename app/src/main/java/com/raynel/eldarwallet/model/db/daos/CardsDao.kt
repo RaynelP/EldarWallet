@@ -1,9 +1,10 @@
-package com.raynel.eldarwallet.model.db
+package com.raynel.eldarwallet.model.db.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import com.raynel.eldarwallet.model.db.entities.Card
 import kotlinx.coroutines.flow.Flow
 
 @Dao

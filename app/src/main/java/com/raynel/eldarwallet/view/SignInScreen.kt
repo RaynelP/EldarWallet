@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,14 +52,31 @@ fun AuthScreen(
     if(uiState.isLoginScreenOpen && !uiState.isRegisterScreenOpen){
         LoginScreen(
             navController = navController,
+            uiState = uiState,
             onRegisterClick = { email, password -> viewModel.login(email, password) },
-            onNavigateToRegisterScreen = { viewModel.openRegisterScreen() }
+            onNavigateToRegisterScreen = { viewModel.openRegisterScreen() },
+            onVerifyFields = { email, password -> viewModel.validateFields(email = email, password = password) }
         )
     } else if(!uiState.isLoginScreenOpen && uiState.isRegisterScreenOpen) {
         RegisterScreen(
             navController = navController,
-            onLoginClick = { email, userName, lastName, password -> viewModel.register(email, userName, lastName, password)},
-            onNavigateToLoginScreen = { viewModel.openLoginScreen() }
+            onLoginClick = { email, userName, lastName, password ->
+                viewModel.register(
+                    email,
+                    userName,
+                    lastName,
+                    password
+                )
+            },
+            onNavigateToLoginScreen = { viewModel.openLoginScreen() },
+            onVerifyFields = { email, password, name, lastName ->
+                viewModel.validateFields(
+                    email = email,
+                    password = password,
+                    userName = name,
+                    lastName = lastName
+                )
+            }
         )
     }
 
@@ -68,11 +86,14 @@ fun AuthScreen(
 fun LoginScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    uiState: AuthViewModel.UiLogin,
     onRegisterClick: (email: String, password: String) -> Unit,
-    onNavigateToRegisterScreen: () -> Unit
+    onNavigateToRegisterScreen: () -> Unit,
+    onVerifyFields: (email: String, password: String) -> Boolean
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var enabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -88,23 +109,57 @@ fun LoginScreen(
         )
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Nombre de usuario") },
-            modifier = Modifier.fillMaxWidth()
+            onValueChange = {
+                email = it
+                enabled = onVerifyFields(
+                    it,
+                    password
+                )
+            },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            isError = uiState.emailIsNotRegistrered,
         )
+        if (uiState.emailIsNotRegistrered) {
+            Text(
+                text = "Email no registrado",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+                    .align(Alignment.Start)
+            )
+        }
+
         Spacer(modifier = Modifier.size(16.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { password = it
+                enabled = onVerifyFields(
+                    email,
+                    it
+                )
+            },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            isError = uiState.passwordIncorrect
         )
+        if (uiState.passwordIncorrect) {
+            Text(
+                text = "Contraseña incorrecta",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 8.dp)
+                    .align(Alignment.Start)
+            )
+        }
+
         Button(
             onClick = { onRegisterClick(email, password) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 16.dp),
+            enabled = enabled
         ) {
             Text("Iniciar sesión")
         }
@@ -122,13 +177,15 @@ fun RegisterScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     onLoginClick: (email: String, userName: String, lastName: String, password: String) -> Unit,
-    onNavigateToLoginScreen: () -> Unit
+    onNavigateToLoginScreen: () -> Unit,
+    onVerifyFields: (email: String, password: String, name: String, lastName: String) -> Boolean
 ) {
 
     var email by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var enabled by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -144,28 +201,58 @@ fun RegisterScreen(
         )
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                enabled = onVerifyFields(
+                    it,
+                    password,
+                    userName,
+                    lastName
+                )
+            },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.size(16.dp))
         OutlinedTextField(
             value = userName,
-            onValueChange = { userName = it },
+            onValueChange = { userName = it
+                enabled = onVerifyFields(
+                    email,
+                    password,
+                    it,
+                    lastName
+                )
+            },
             label = { Text("Nombre") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.size(16.dp))
         OutlinedTextField(
             value = lastName,
-            onValueChange = { lastName = it },
+            onValueChange = {
+                lastName = it
+                enabled = onVerifyFields(
+                    email,
+                    password,
+                    userName,
+                    it
+                )
+            },
             label = { Text("Apellido") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.size(16.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { password = it
+                enabled = onVerifyFields(
+                    email,
+                    it,
+                    userName,
+                    lastName
+                )
+            },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation()
@@ -174,7 +261,8 @@ fun RegisterScreen(
             onClick = { onLoginClick(email, userName, lastName, password) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp)
+                .padding(top = 16.dp),
+            enabled = enabled
         ) {
             Text("Registrarse")
         }

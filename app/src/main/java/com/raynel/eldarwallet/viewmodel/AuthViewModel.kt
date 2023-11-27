@@ -14,31 +14,58 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(private val authenticationRepo: Authentication): ViewModel() {
 
+    // estado de vista del viewmodel
     private val _uiState : MutableStateFlow<UiLogin> = MutableStateFlow(UiLogin())
     val uiState: StateFlow<UiLogin> get() = _uiState
 
     fun login(email: String, password: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val user = authenticationRepo.login(email, password)
-            if(user == null){
-                // no esta registrado
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    emailLogIn = user.email
-                )
+            try {
+                val result = authenticationRepo.login(email, password)
+                if(result is AutheticationRepoImpl.LoginResult.Successful){
+                    _uiState.value = _uiState.value.copy(
+                        emailLogIn = result.email
+                    )
+                }else if(result is AutheticationRepoImpl.LoginResult.EmailIsNotRegister){
+                    _uiState.value = _uiState.value.copy(
+                        emailIsNotRegistrered = true
+                    )
+                } else if(result is AutheticationRepoImpl.LoginResult.PasswordIncorrect){
+                    _uiState.value = _uiState.value.copy(
+                        passwordIncorrect = true
+                    )
+                }
+            }catch (e: Exception){
+                // hubo un error
             }
         }
     }
 
     fun register(email: String, userName: String, lastName: String, password: String){
         viewModelScope.launch(Dispatchers.IO) {
-            val emailRegistrered = authenticationRepo.register(email, userName, lastName, password)
-            if(emailRegistrered != null){
-                _uiState.value = _uiState.value.copy(
-                    emailLogIn = emailRegistrered
-                )
+            try {
+                val result = authenticationRepo.register(email, userName, lastName, password)
+
+                if(result is AutheticationRepoImpl.LoginResult.Successful){
+                    _uiState.value = _uiState.value.copy(
+                        emailLogIn = result.email
+                    )
+                }
+
+                else {}// hubo un error
+            }catch (e: Exception){
+                // hubo un error
             }
+
         }
+    }
+
+    fun validateFields(email: String, password: String, userName: String = "1", lastName: String = "1"): Boolean{
+        _uiState.value = _uiState.value.copy(
+            emailIsNotRegistrered = false,
+            passwordIncorrect = false
+        )
+        return email.isNotEmpty() && password.isNotEmpty() && userName.isNotEmpty() && lastName.isNotEmpty()
     }
 
     fun openLoginScreen(){
@@ -58,6 +85,8 @@ class AuthViewModel(private val authenticationRepo: Authentication): ViewModel()
     data class UiLogin(
         val isLoginScreenOpen: Boolean = true,
         val isRegisterScreenOpen: Boolean = false,
+        val emailIsNotRegistrered: Boolean = false,
+        val passwordIncorrect: Boolean = false,
         val emailLogIn: String? = null
     )
 

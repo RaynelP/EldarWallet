@@ -11,8 +11,8 @@ import com.raynel.eldarwallet.model.interfaces.CardsRepo
 import com.raynel.eldarwallet.model.interfaces.UserRepo
 import com.raynel.eldarwallet.model.implementations.UserRepoImp
 import com.raynel.eldarwallet.model.db.AppDataBase
-import com.raynel.eldarwallet.model.db.Card
-import com.raynel.eldarwallet.model.db.User
+import com.raynel.eldarwallet.model.db.entities.Card
+import com.raynel.eldarwallet.model.db.entities.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,13 +43,12 @@ class MainViewModel(
     private fun getUser(email: String){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val user = userRepo.getUser(email)
+                val user = userRepo.getUser(email) ?: throw Exception()
                 _uiState.value = _uiState.value.copy(
                     user = user
                 )
-                if(user == null) throw Exception()
             }catch (e: Exception){
-
+                // hubo un error, no se pudo cargar al usuario
             }
         }
     }
@@ -57,6 +56,8 @@ class MainViewModel(
     fun addCard(name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String){
         viewModelScope.launch(Dispatchers.IO) {
             try {
+
+                // verifico que tipo de tarjeta es
                 val firstChar = cardNumber.first()
                 val firstNumber = firstChar.toString().toInt()
 
@@ -67,11 +68,12 @@ class MainViewModel(
                     else -> {"Desconocida"}
                 }
 
+                // guardo la tarjeta
                 cardsRepo.saveNewCard(
                     email,
                     Card(null, email, name, cardNumber, lastThreeNumbers, dateExpired, type)
                 )
-
+                // cambio el estado de la pantalla
                 onCloseAddCardScreen()
             }catch (e: Exception){
 
@@ -79,10 +81,11 @@ class MainViewModel(
         }
     }
 
-    fun verifyFields(name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String): Boolean{
+    fun validateFields(cardName: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String): Boolean {
 
-        val fieldsNotEmpty = name.isNotEmpty() && cardNumber.isNotEmpty() && lastThreeNumbers.isNotEmpty() && dateExpired.isNotEmpty()
-        val equalName = _uiState.value.user?.name == name
+        val fieldsNotEmpty = cardName.isNotEmpty() && cardNumber.isNotEmpty() && lastThreeNumbers.isNotEmpty() && dateExpired.isNotEmpty()
+        val userName = _uiState.value.user?.name + " " + _uiState.value.user?.lastName
+        val equalName = userName.equals(cardName, ignoreCase = true)
 
         return fieldsNotEmpty && equalName
     }
@@ -114,7 +117,7 @@ class MainViewModel(
     data class MainUiState(
         var addCardScreenOpen: Boolean = false,
         var onError: Boolean = false,
-        var user: User? = null,
+        val user: User? = null,
         var onLogOut: Boolean = false
     )
 

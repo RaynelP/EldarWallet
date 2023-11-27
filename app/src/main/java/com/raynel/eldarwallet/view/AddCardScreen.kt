@@ -2,36 +2,27 @@ package com.raynel.eldarwallet.view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 
 @Composable
 fun AddCardScreen(
     modifier: Modifier = Modifier,
     addCard: (name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String) -> Unit,
-    verifyFields: (name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String) -> Boolean
+    validateFields: (name: String, cardNumber: String, lastThreeNumbers: String, dateExpired: String) -> Boolean
 ) {
 
     var newCardNumber by remember { mutableStateOf("") }
@@ -55,21 +46,21 @@ fun AddCardScreen(
             value = newCardName,
             onValueChange = {
                 newCardName = it
-                enabled = verifyFields(
+                enabled = validateFields(
                     it,
                     newCardNumber,
                     newCardThreeNumbers,
                     newCardDateExpired
                 )
             },
-            label = { Text("Nombre") },
+            label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = newCardNumber,
             onValueChange = { newCardNumber = it
-                enabled = verifyFields(
+                enabled = validateFields(
                     newCardName,
                     it,
                     newCardThreeNumbers,
@@ -83,7 +74,7 @@ fun AddCardScreen(
         OutlinedTextField(
             value = newCardDateExpired,
             onValueChange = { newCardDateExpired = it
-                enabled = verifyFields(
+                enabled = validateFields(
                     newCardName,
                     newCardNumber,
                     newCardThreeNumbers,
@@ -97,7 +88,7 @@ fun AddCardScreen(
         OutlinedTextField(
             value = newCardThreeNumbers,
             onValueChange = { newCardThreeNumbers = it
-                enabled = verifyFields(
+                enabled = validateFields(
                     newCardName,
                     newCardNumber,
                     it,
@@ -136,5 +127,8 @@ fun AddCardScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewSheet() {
-    AddCardScreen(addCard = {name, cardNumber, lastThreeNumbers, dateExpired ->  }, verifyFields = {name, cardNumber, lastThreeNumbers, dateExpired ->  true})
+    AddCardScreen(
+        addCard = { name, cardNumber, lastThreeNumbers, dateExpired -> },
+        validateFields = { name, cardNumber, lastThreeNumbers, dateExpired -> true }
+    )
 }

@@ -1,7 +1,7 @@
 package com.raynel.eldarwallet.model.implementations
 
-import com.raynel.eldarwallet.model.db.User
-import com.raynel.eldarwallet.model.db.UserDao
+import com.raynel.eldarwallet.model.db.entities.User
+import com.raynel.eldarwallet.model.db.daos.UserDao
 import com.raynel.eldarwallet.model.interfaces.UserRepo
 import kotlinx.coroutines.flow.Flow
 

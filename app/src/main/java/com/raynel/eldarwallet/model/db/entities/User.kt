@@ -1,4 +1,4 @@
-package com.raynel.eldarwallet.model.db
+package com.raynel.eldarwallet.model.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

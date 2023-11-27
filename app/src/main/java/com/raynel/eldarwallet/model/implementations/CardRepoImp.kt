@@ -1,7 +1,7 @@
 package com.raynel.eldarwallet.model.implementations
 
-import com.raynel.eldarwallet.model.db.Card
-import com.raynel.eldarwallet.model.db.CardsDao
+import com.raynel.eldarwallet.model.db.entities.Card
+import com.raynel.eldarwallet.model.db.daos.CardsDao
 import com.raynel.eldarwallet.model.interfaces.CardsRepo
 import kotlinx.coroutines.flow.Flow
 

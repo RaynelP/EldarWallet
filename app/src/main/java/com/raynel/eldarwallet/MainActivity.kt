@@ -14,8 +14,6 @@ import com.raynel.eldarwallet.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
 
-    lateinit var mainViewModel: MainViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
